@@ -1,0 +1,161 @@
+import { useState, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { GraduationCap, Home, Images, Users, CalendarDays, Heart, Menu, X } from 'lucide-react'
+
+const links = [
+  { to: '/',           label: 'Beranda',    Icon: Home         },
+  { to: '/gallery',    label: 'Galeri',     Icon: Images       },
+  { to: '/classmates', label: 'Teman',      Icon: Users        },
+  { to: '/timeline',   label: 'Perjalanan', Icon: CalendarDays },
+  { to: '/farewell',   label: 'Pesan',      Icon: Heart        },
+]
+export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false)
+  const [open, setOpen]         = useState(false)
+  const { pathname }            = useLocation()
+
+  useEffect(() => { setOpen(false) }, [pathname])
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 40)
+    window.addEventListener('scroll', fn)
+    return () => window.removeEventListener('scroll', fn)
+  }, [])
+
+  return (
+    <>
+      <motion.nav
+        initial={{ y: -72, opacity: 0 }}
+        animate={{ y: 0,   opacity: 1 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+          padding:        scrolled ? '10px 28px' : '18px 28px',
+          background:     scrolled ? 'rgba(245,240,232,0.92)' : 'transparent',
+          backdropFilter: scrolled ? 'blur(20px)' : 'none',
+          borderBottom:   scrolled ? '1px solid rgba(201,168,76,0.18)' : 'none',
+          transition: 'padding 0.35s ease, background 0.35s ease, border 0.35s ease',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}
+      >
+        {/* Logo */}
+        <Link to="/" style={{ textDecoration: 'none' }}>
+          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #C9A84C, #E2C47A)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 14px rgba(201,168,76,0.38)', flexShrink: 0,
+            }}>
+              <GraduationCap size={20} color="#1A2744" strokeWidth={2} />
+            </div>
+            <div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 19,
+                fontWeight: 700, color: 'var(--color-navy)', lineHeight: 1 }}>Kenangan</div>
+              <div style={{ fontFamily: 'var(--font-accent)', fontSize: 11,
+                color: 'var(--color-gold)', letterSpacing: '0.08em' }}>Class of 2024</div>
+            </div>
+          </motion.div>
+        </Link>
+
+        {/* Desktop links */}
+        <div className="nav-desktop" style={{ display: 'flex', gap: 2 }}>
+          {links.map(({ to, label, Icon }) => {
+            const active = pathname === to
+            return (
+              <Link key={to} to={to} style={{
+                textDecoration: 'none',
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 16px', borderRadius: 99,
+                fontFamily: 'var(--font-body)', fontSize: 13.5,
+                fontWeight: active ? 600 : 400,
+                color:      active ? 'var(--color-navy)' : 'var(--color-ink-light)',
+                background: active ? 'rgba(201,168,76,0.13)' : 'transparent',
+                border:     active ? '1px solid rgba(201,168,76,0.35)' : '1px solid transparent',
+                transition: 'all 0.22s ease',
+              }}>
+                <Icon size={14} strokeWidth={active ? 2.2 : 1.7} />
+                {label}
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Hamburger */}
+        <motion.button whileTap={{ scale: 0.88 }}
+          onClick={() => setOpen(p => !p)}
+          className="nav-burger"
+          style={{ background: 'none', border: 'none', cursor: 'pointer',
+            padding: 8, color: 'var(--color-navy)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <AnimatePresence mode="wait" initial={false}>
+            {open
+              ? <motion.span key="x"
+                  initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <X size={22} strokeWidth={2} />
+                </motion.span>
+              : <motion.span key="menu"
+                  initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <Menu size={22} strokeWidth={2} />
+                </motion.span>
+            }
+          </AnimatePresence>
+        </motion.button>
+      </motion.nav>
+
+      {/* Mobile dropdown */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -14, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0,   scale: 1 }}
+            exit={{   opacity: 0, y: -14,  scale: 0.97 }}
+            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              position: 'fixed', top: 72, left: 14, right: 14, zIndex: 99,
+              background: 'rgba(245,240,232,0.97)', backdropFilter: 'blur(22px)',
+              borderRadius: 16, border: '1px solid rgba(201,168,76,0.2)',
+              padding: 10, boxShadow: '0 18px 50px rgba(26,39,68,0.14)',
+            }}
+          >
+            {links.map(({ to, label, Icon }, i) => {
+              const active = pathname === to
+              return (
+                <motion.div key={to}
+                  initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.06 }}>
+                  <Link to={to} style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '13px 16px', borderRadius: 12,
+                    textDecoration: 'none', fontFamily: 'var(--font-body)', fontSize: 15,
+                    fontWeight: active ? 600 : 400,
+                    color:      active ? 'var(--color-navy)' : 'var(--color-ink)',
+                    background: active ? 'rgba(201,168,76,0.1)' : 'transparent',
+                    transition: 'all 0.2s ease',
+                  }}>
+                    <Icon size={17} strokeWidth={active ? 2.2 : 1.7}
+                      color={active ? 'var(--color-gold)' : 'var(--color-ink-light)'} />
+                    {label}
+                  </Link>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <style>{`
+        .nav-desktop { display: flex !important; }
+        .nav-burger  { display: none !important; }
+        @media (max-width: 600px) {
+          .nav-desktop { display: none !important; }
+          .nav-burger  { display: flex !important; }
+        }
+      `}</style>
+    </>
+  )
+}
